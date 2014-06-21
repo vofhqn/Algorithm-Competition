@@ -28,7 +28,6 @@ int main(){
 		}
 	}
  
-	return 0;
 	u[1] = squ[1] = 1;
 	for(int i = 2; i < N; i ++){
 		if(prime[i]){
@@ -46,12 +45,10 @@ int main(){
 			H[i] = 1 - i;
 		}
 	}
-	return 0;
 	H[0] = sH[0] = 0;
 	for(int i = 1; i < N; i ++){
 		sH[i] = (H[i] + sH[i - 1]) % Mod;
 	}
-	return 0;
 	int T;
 	cin>> T;
 	while(T --){
