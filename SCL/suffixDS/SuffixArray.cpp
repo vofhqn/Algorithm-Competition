@@ -1,19 +1,16 @@
 #include <iostream>
+#include <cstring>
 #include <cassert>
 #include <string>
 #include <algorithm>
 #include <vector>
 using namespace std;
 
-const int N = 100010;
 
-const long long Mul = 1000000007;
-int Log[N];
-struct Suffix_Array{
-	int str[N], suffix[N], rank[N], height[N];
-	long long hash[N];
+class Suffix_Array{
+private:
+	static const int N = 100010;
 	
-	int n;
 	struct Data{
 		int head, loc, p;
 		Data(){}
@@ -23,35 +20,6 @@ struct Suffix_Array{
 			return loc > a.loc;
 		}
 	};
-	
-	long long _pow[N];
-	
-	int mheight[21][N];
-	
-	Suffix_Array(){}
-	Suffix_Array(vector<int> &_str){
-		n = _str.size();
-		for(int i = 0; i < _str.size(); i ++)
-			str[i] = _str[i];
-		str[n] = -1;
-		_pow[0] = 1;
-		for(int i = 1; i <= (int)_str.size() + 1; i ++)
-			_pow[i] = _pow[i - 1] * Mul;
-	}
-	void init(vector<int> &_str){
-		n = _str.size();
-		for(int i = 0; i < _str.size(); i ++)
-			str[i] = _str[i];
-		str[n] = -1;
-		_pow[0] = 1;
-		for(int i = 1; i <= (int)_str.size() + 1; i ++)
-			_pow[i] = _pow[i - 1] * Mul;
-	}
-	
-	inline long long ghash(int h, int e){
-		if(e < h) return 0;
-		return hash[e] - ((h)?hash[h - 1]:0)*_pow[e - h + 1];
-	}
 	int to[N];
 	void init(){
 		vector<Data> data;
@@ -105,27 +73,31 @@ struct Suffix_Array{
 			}	
 		}
 		
-		for(int i = 0; i <= n; i ++){
-			hash[i] = (i?hash[i - 1]:0) * Mul + str[i];
-		}
-		
-		for(int i = 2; i <= n; i ++){
-			int l = 0, r = min(n - suffix[i] + 1, n - suffix[i - 1] + 1);
-			int si = suffix[i], si1 = suffix[i - 1];
-			int t = -1, mid;
-			while(l <= r){
-				mid = (l + r)/2;
-				if(ghash(si, si + mid - 1) == ghash(si1, si1 + mid - 1)){
-					t = mid;
-					l = mid + 1;
-				}else{
-					r = mid - 1;
-				}
+		for(int i = 0; i < n; i ++)
+			rank[i] --;
+		for(int i = 0; i < n; i ++)
+			suffix[rank[i]] = i;
+
+		if(rank[0] == 0) h[0] = 0;
+		else{
+			for(; h[0] <= n - suffix[rank[0] - 1]; h[0] ++){
+				if(str[0 + h[0]] != str[suffix[rank[0] - 1] + h[0]])
+						break;
 			}
-			height[i] = t;
 		}
-		
-		height[0] = 0;
+		for(int i = 1; i < n; i ++){
+			if(rank[i] == 0){
+				h[i] = 0; continue;
+			}
+			int pre = suffix[rank[i] - 1];
+			int be = max(h[i - 1] - 1, 0), en = max(n - i, n - pre);
+			for(h[i] = be; h[i] <= en; h[i] ++){
+				if(str[i + h[i]] != str[pre + h[i]])
+					break;
+			}
+		}
+		for(int i = 0; i < n; i ++)
+			height[rank[i]] = h[i];
 		for(int i = 1; i <= n; i ++){
 			mheight[0][i] = height[i];
 		}
@@ -137,11 +109,26 @@ struct Suffix_Array{
 			}
 		}
 	}
+public:
+	int str[N], suffix[N], rank[N], height[N], h[N], n;	
+	
+	int mheight[21][N];
+	
+	Suffix_Array(){}
+	void init(vector<int> &_str){
+		n = _str.size();
+		for(int i = 0; i < _str.size(); i ++)
+			str[i] = _str[i];
+		str[n] = -1;
+		init();
+	}
 	int lcp(int s1, int s2){
+		if(s1 == s2) return n - s2;
 		int r1 = rank[s1], r2 = rank[s2];
 		
 		if(r1 > r2) swap(r1, r2);
-		int l = Log[r2 - r1];
+		int l, cur;
+		for(l = -1, cur = 1; cur <= r2 - r1; cur *= 2, l ++){}
 		int ret = mheight[l][r2];
 		int loc = r1 + (1 << l);
 		ret = min(ret, mheight[l][loc]);
