@@ -8,8 +8,6 @@
 using namespace std;
 
 const int N = 300000 + 10;
-const int Mod = 1000000007;
-
 
 struct State{
     State *son[29], *parent;
