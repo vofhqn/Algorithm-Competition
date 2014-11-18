@@ -92,7 +92,7 @@ Describer merge(vector<Describer> &neigh){
 	ret.standardize();
 	return ret;
 }
-Describer erase(Describer c, Describer cur){
+Describer erase(Describer c, Describer &cur){
 	Describer ret = c;
 	ret.size -= cur.size;
 	ret.ways[0] = Long(fac[ret.size - 1]);
