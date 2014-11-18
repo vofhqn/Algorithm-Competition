@@ -128,7 +128,7 @@ void dfs1(int u, int fa){
 	}
 	Each[u] = merge(sons);
 }
-void dfs2(int u, int fa, Describer cur){
+void dfs2(int u, int fa, Describer &cur){
 	cnt ++;
 	vector<Describer> arr;
 	if(cur.size)arr.push_back(cur);
